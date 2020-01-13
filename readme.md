@@ -44,7 +44,7 @@ styleFun | 样式函数方法 | 否 | Function | styleFun(参数是当前表格w
 ``` javascript
    // 第一步
    在入口文件的index.html，引入XLSX样式
-   <script src="https://unpkg.com/pl-export-excel@1.1.1/package/xlsx.core.min.js"></script>
+   <script src="https://unpkg.com/pl-export-excel@1.1.3/package/xlsx.core.min.js"></script>
    // 第二步,在项目中的使用
    import { exportJsonToExcel, formatJson } from 'pl-export-excel'
    // 导出按钮方法
@@ -113,9 +113,9 @@ styleFun | 样式函数方法 | 否 | Function | styleFun(参数是当前表格w
   }
   // 第二步:  在入口文件的index.html
   // 引入pl-export-excel
-  <script src="https://unpkg.com/pl-export-excel@1.1.1/lib/index.js"></script>
+  <script src="https://unpkg.com/pl-export-excel@1.1.3/lib/index.js"></script>
   // 引入XLSX样式
-  <script src="https://unpkg.com/pl-export-excel@1.1.1/package/xlsx.core.min.js"></script>
+  <script src="https://unpkg.com/pl-export-excel@1.1.3/package/xlsx.core.min.js"></script>
 ```
 
 # cdn方式用法
@@ -126,9 +126,9 @@ styleFun | 样式函数方法 | 否 | Function | styleFun(参数是当前表格w
     <div>我是内容</div>
     在这里引入脚本
     // 引入pl-export-excel
-    <script src="https://unpkg.com/pl-export-excel@1.1.1/lib/index.js"></script>
+    <script src="https://unpkg.com/pl-export-excel@1.1.3/lib/index.js"></script>
      // 引入XLSX样式
-    <script src="https://unpkg.com/pl-export-excel@1.1.1/package/xlsx.core.min.js"></script>
+    <script src="https://unpkg.com/pl-export-excel@1.1.3/package/xlsx.core.min.js"></script>
   </body>
 
   // 写法
