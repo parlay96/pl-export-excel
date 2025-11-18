@@ -57,7 +57,7 @@ styleFun | 样式函数方法 | 否 | Function | styleFun(参数是当前表格w
         const list = Array.from({ length: 1000 }, (_, idx) => ({ names: '娃哈哈',
             date: '201920120',
             orderNumber: '1521',
-            customerName: '彭垒',
+            customerName: '王小虎',
             orderState: '在线',
             orderPayState: '全付款'
         }))
