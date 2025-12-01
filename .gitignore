@@ -1,0 +1,17 @@
+# Editor directories and files
+.idea
+
+# Package Manager
+node_modules
+.pnpm-debug.log*
+
+# System
+.DS_Store
+
+# Bundle
+dist
+./*.yaml
+
+yarn-error.log
+yarn-lock.log
+yarn.lock
