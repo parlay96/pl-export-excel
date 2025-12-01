@@ -39,45 +39,7 @@
     exportJsonToExcel({
       header: ["经销商名称", "下单时间", "订单编号", "客户名称", "订单状态", "付款状态"],
       datas: list,
-      multiHeader: [
-        ["工作情况一览表", "", "", "", "", ""],
-        ["", "", "", "", "", ""] // 为啥这里需要这样搞个空字符呢，存属上面合并列导致不得不这样写个哦
-      ],
-      merges: [
-        {
-          s: {
-            //s为开始
-            c: 0, //开始列
-            r: 0 //可以看成开始行,实际是取值范围
-          },
-          e: {
-            //e结束
-            c: 5, //结束列
-            r: 1 //结束行
-          }
-        }
-      ],
-      filename: "erp订单",
-      bookType: "xlsx",
-      styleCb: function (ws) {
-        ws["A1"].s = {
-          font: {
-            name: "宋体",
-            sz: 18,
-            color: { rgb: "ff0000" },
-            bold: true,
-            italic: false,
-            underline: false
-          },
-          alignment: {
-            horizontal: "center",
-            vertical: "center"
-          },
-          fill: {
-            fgColor: { rgb: "008000" }
-          }
-        };
-      }
+      filename: "erp订单"
     });
    }
 ```
