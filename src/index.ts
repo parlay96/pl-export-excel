@@ -1,7 +1,17 @@
+import isArray from "lodash/isArray";
+import isFunction from "lodash/isFunction";
+import isObject from "lodash/isObject";
 import cloneDeep from "lodash/cloneDeep";
-import { IExcelOptions, IFormatData, ISubTitle } from "./type";
+import { saveAs } from "file-saver";
+import { IExcelOptions, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
 
-export const baseResourceUrl = "https://cdn.jsdelivr.net/npm/pl-export-excel@1.1.7/dist/xlsx.core.min.js";
+class Workbook {
+  SheetNames: string[] = [];
+  Sheets: { [sheet: string]: any } = {};
+  constructor() {}
+}
+
+const baseResourceUrl = "https://cdn.jsdelivr.net/npm/pl-export-excel@1.1.7/dist/xlsx.core.min.js";
 const loadScript = (src: string): Promise<void> => {
   // Check if there are already script tags with the same src
   if (document.querySelector(`script[src="${src}"]`)) {
@@ -22,7 +32,7 @@ const loadScript = (src: string): Promise<void> => {
   });
 };
 
-export function isTwoDimensionalArray(arr) {
+function isTwoDimensionalArray(arr) {
   if (!Array.isArray(arr)) {
     return false;
   }
@@ -44,7 +54,7 @@ const formatDateToYYYYMMDD = (date: Date): string => {
  * @param headers Header configuration
  * @param datas table data
  */
-export const formatData = (datas: IExcelOptions["datas"], headers: IExcelOptions["headers"]): IFormatData => {
+const formatData = (datas: IExcelOptions["datas"], headers: IExcelOptions["headers"]): IFormatData => {
   const listen = datas.map((item) => {
     return headers.map((header) => (header?.key ? item[header?.key] || "" : ""));
   });
@@ -55,7 +65,7 @@ export const formatData = (datas: IExcelOptions["datas"], headers: IExcelOptions
   return listen;
 };
 
-export const expandConfig = (options: IExcelOptions) => {
+const expandConfig = (options: IExcelOptions) => {
   const defaults = {
     bookType: "xlsx",
     autoWidth: true,
@@ -66,18 +76,18 @@ export const expandConfig = (options: IExcelOptions) => {
 };
 
 /** Convert string to ArrayBuffer */
-export const s2ab = (s: string) => {
-  var buf = new ArrayBuffer(s.length);
-  var view = new Uint8Array(buf);
-  for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff;
+const s2ab = (s: string) => {
+  const buf = new ArrayBuffer(s.length);
+  const view = new Uint8Array(buf);
+  for (let i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff;
   return buf;
 };
 
-export const loadResource = (url: string): Promise<any> => {
+const loadResource = (url: string): Promise<any> => {
   return Promise.all([loadScript(url)]);
 };
 
-export const two_array_to_sheet = (data: IFormatData) => {
+const two_array_to_sheet = (data: IFormatData) => {
   const ws = {};
   const range = {
     s: {
@@ -126,7 +136,7 @@ export const two_array_to_sheet = (data: IFormatData) => {
  * @param titleConfig title configuration
  * @param defaultColNum Default is the length of the headers field
  */
-export const handleTitle = (titleConfig: ISubTitle, defaultColNum: number) => {
+const handleTitle = (titleConfig: ISubTitle, defaultColNum: number) => {
   if (!titleConfig?.title) return null;
   const data: ISubTitle["title"][][] = [];
   const colNum = titleConfig?.colNum || defaultColNum || 1;
@@ -154,7 +164,7 @@ export const handleTitle = (titleConfig: ISubTitle, defaultColNum: number) => {
 };
 
 /** handle title merges and style  */
-export const handleTitleMergesAndStyle = (ws: any, titleConfig: ISubTitle): any => {
+const handleTitleMergesAndStyle = (ws: any, titleConfig: ISubTitle): any => {
   const exist = titleConfig.colNum && titleConfig.rowNum && titleConfig.title;
   if (!exist) return ws;
   try {
@@ -193,7 +203,7 @@ export const handleTitleMergesAndStyle = (ws: any, titleConfig: ISubTitle): any 
   }
 };
 
-export const mergesCells = (ws: any, merges: IExcelOptions["merges"]) => {
+const mergesCells = (ws: any, merges: IExcelOptions["merges"]) => {
   if (!merges?.length) return ws;
   try {
     const lvs = cloneDeep(ws);
@@ -215,7 +225,7 @@ export const mergesCells = (ws: any, merges: IExcelOptions["merges"]) => {
 };
 
 /** Column configuration information */
-export const handleAutoWidth = (ws: any, list: IFormatData) => {
+const handleAutoWidth = (ws: any, list: IFormatData) => {
   try {
     const lvs = cloneDeep(ws);
     /** Set the maximum width of each column in the worksheet */
@@ -255,4 +265,147 @@ export const handleAutoWidth = (ws: any, list: IFormatData) => {
     console.log(error);
     return ws;
   }
+};
+
+export const exportJsonToExcel = async (options: IExcelOptions) => {
+  const mergeOptions = expandConfig(options);
+  const { titleConfig, multiHeader, filename, bookType, merges, autoWidth, styleCb, xlsxStyleResourceUrl } = mergeOptions;
+  const createWorkbook = (): Workbook => {
+    return new Workbook();
+  };
+  const init = async () => {
+    // is data array
+    if (!isArray(mergeOptions.datas)) {
+      console.error("The table data is not of array type, please check the 'datas' fields");
+      return { ws: null, list: [] };
+    }
+
+    if (!isArray(mergeOptions.headers) || !mergeOptions.headers?.length) {
+      console.error("The header is empty, please check the 'headers' fields");
+      return { ws: null, list: [] };
+    }
+
+    try {
+      await loadResource(xlsxStyleResourceUrl);
+      if (!(window as any)?.XLSX) {
+        throw new Error("XLSX not found, Please check if xlsxStyleResource is loaded");
+      }
+      const list = cloneDeep(mergeOptions.datas);
+      const data = formatData(list, mergeOptions.headers);
+      if (!data.length) return { ws: null, list: [] };
+
+      // Handling multi_headers
+      if (isArray(multiHeader) && multiHeader.length) {
+        for (let i = multiHeader.length - 1; i > -1; i--) {
+          data.unshift(multiHeader[i] as any);
+        }
+      }
+
+      // Handling title
+      if (titleConfig) {
+        const titleData = handleTitle(titleConfig, mergeOptions.headers.length);
+        data.unshift(...titleData);
+      }
+      // array_to_sheet
+      let ws = two_array_to_sheet(data);
+      // console.log(ws, data);
+      return { ws, list: data };
+    } catch (error) {
+      console.error("Failed:", error);
+      return { ws: null, list: [] };
+    }
+  };
+
+  const wb = createWorkbook();
+
+  let { ws, list } = await init();
+
+  if (!ws || !list.length) return;
+
+  if (isArray(merges)) {
+    ws = mergesCells(ws, merges);
+  }
+
+  if (autoWidth) {
+    ws = handleAutoWidth(ws, list);
+  }
+  // Processing Title Styles
+  if (titleConfig) {
+    ws = handleTitleMergesAndStyle(ws, titleConfig);
+  }
+  // add custom style
+  if (isFunction(styleCb)) {
+    styleCb(ws);
+  }
+  // console.log(ws);
+  try {
+    wb.SheetNames.push("Excel");
+    wb.Sheets["Excel"] = ws;
+    const wbout = XLSX.write(wb, {
+      bookType: bookType,
+      bookSST: false,
+      // binary: binary string (byte n is data.charCodeAt(n))
+      type: "binary"
+    });
+    // console.log(wb);
+    saveAs(
+      new Blob([s2ab(wbout)], {
+        type: "application/octet-stream"
+      }),
+      `${filename}.${bookType}`
+    );
+  } catch (error) {
+    console.error("Failed:", error);
+  }
+};
+
+export const excelToJson = (options: IExcelToJsonOptions): Promise<{ originalList: any[]; formatList: any[] }> => {
+  return new Promise(async (resolve, reject) => {
+    const { file, keys, startRow, xlsxStyleResourceUrl } = isObject(options) ? options : ({} as IExcelToJsonOptions);
+    try {
+      if (!file || !(file instanceof File)) {
+        throw new Error("file is required， or it's not a file");
+      }
+      await loadResource(xlsxStyleResourceUrl || baseResourceUrl);
+      if (!(window as any)?.XLSX) {
+        throw new Error("XLSX not found, Please check if xlsxStyleResource is loaded");
+      }
+      const reader = new FileReader();
+      reader.onload = function (e: any) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const firstSheetName = workbook.SheetNames[0];
+          if (!firstSheetName) {
+            resolve({ formatList: [], originalList: [] });
+            return;
+          }
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          // Convert to array object
+          if (keys?.length && isTwoDimensionalArray(jsonData)) {
+            const list = startRow ? jsonData.slice(startRow) : jsonData;
+            const cvt = list.map((items) => {
+              const obj: any = {};
+              items.forEach((item, index) => {
+                obj[keys[index]] = item || "";
+              });
+              return obj;
+            });
+            resolve({ formatList: cvt, originalList: jsonData });
+            return;
+          }
+          // Not converting
+          resolve({ formatList: [], originalList: isArray(jsonData) ? jsonData : [] });
+        } catch (error) {
+          console.error("Failed:", error);
+          reject(error);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Failed:", error);
+      reject(error);
+    }
+  });
 };
