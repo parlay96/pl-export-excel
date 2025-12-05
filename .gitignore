@@ -1,7 +1,7 @@
 # Editor directories and files
 .idea
 
-# Package Manager
+# Package Manager1
 node_modules
 .pnpm-debug.log*
 
