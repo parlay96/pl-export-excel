@@ -2,25 +2,33 @@
 
 > Export Excel files to JSON data and convert JSON data to Excel files
 
-# method of use
+# install
 
 > npm i pl-export-excel
 
-# exportJsonToExcel Api
+# exportJsonToExcel(options) => Promise<void>
 
-|        参数名        | 参数描述                                                | 必填 |   类型   |    默认值    |
-| :------------------: | ------------------------------------------------------- | :--: | :------: | :----------: |
-|       headers        | 头部                                                    |  是  |  Array   |      []      |
-|        datas         | 表格数据                                                |  是  |  Array   |      []      |
-|     titleConfig      | 标题配置, 配置描述请看文档下面                          |  否  |  object  |      -       |
-|     multiHeader      | 多级头, 给表格设置多行头部,需要自己去合并单元格。       |  否  |  Array   |      -       |
-|       filename       | 表格名                                                  |  否  |  String  | 'excel-list' |
-|        merges        | 合并单元格数组, 配置描述请看文档下面                    |  否  |  Array   |      -       |
-|      autoWidth       | 宽度是否自适应                                          |  否  | Boolean  |     true     |
-|       bookType       | 文件类型                                                |  否  |  String  |    'xlsx'    |
-|       styleCb        | 样式[style](#cell-styles)                               |  否  | Function |      -       |
-| xlsxStyleResourceUrl | 自定义xlsx样式资源地址，基本用不到，除非你想替换资源cdn |  否  |  String  |      -       |
-|         keys         | 需要导出表格数据中的字段key名, 不配置默认导出所有字段   |  否  |  Array   |      -       |
+|   options：参数名    | 参数描述                                          | 必填 |   类型   |    默认值    |
+| :------------------: | ------------------------------------------------- | :--: | :------: | :----------: |
+|        datas         | 表格数据                                          |  是  |  Array   |      []      |
+|       headers        | 表头部配置, 配置描述请看文档下面                  |  是  |  Array   |      []      |
+|     titleConfig      | 主标题配置, 配置描述请看文档下面                  |  否  |  object  |      -       |
+|        merges        | 合并单元格配置, 配置描述请看文档下面              |  否  |  Array   |      -       |
+|     multiHeader      | 多级头, 给表格设置多行头部,需要自己去合并单元格。 |  否  |  Array   |      -       |
+|       filename       | 表格名                                            |  否  |  String  | 'excel-list' |
+|      autoWidth       | 宽度是否自适应                                    |  否  | Boolean  |     true     |
+|       bookType       | 文件类型                                          |  否  |  String  |    'xlsx'    |
+|       styleCb        | 样式[style](#cell-styles)                         |  否  | Function |      -       |
+| xlsxStyleResourceUrl | 自定义xlsx样式资源地址，基本用不到                |  否  |  String  |      -       |
+
+# excelToJson(options)=> Promise<{ originalList: any[]; formatList: any[] }>
+
+|   options：参数名    | 参数描述                                                                           | 必填 |  类型  | 默认值 |
+| :------------------: | ---------------------------------------------------------------------------------- | :--: | :----: | :----: |
+|         file         | 转换的文件                                                                         |  是  |  File  |   -    |
+|       startRow       | 指定某一行之前为消除标题条目；当表格有标题时，或者某些行你想跳过时这是非常有用的。 |  否  | number |   -    |
+|         keys         | 转成数组对象必填，单元格每列它所对应的key值                                        |  否  | Array  |   -    |
+| xlsxStyleResourceUrl | 自定义xlsx样式资源地址，基本用不到                                                 |  是  | String |   -    |
 
 # npm
 
@@ -28,21 +36,22 @@
    import { exportJsonToExcel } from 'pl-export-excel'
    // 导出按钮方法
    handleEmits () {
+    const headers = [
+      { title: "经销商名称", key: "names" },
+      { title: "下单时间", key: "date" },
+      { title: "订单编号", key: "orderNumber" },
+      { title: "客户名称", key: "customerName" }
+    ]
     // 表格数据
-    const list = Array.from({ length: 200 }, (_, idx) => ({
-      names: "娃哈哈",
+    const datas = Array.from({ length: 200 }, (_, idx) => ({
+      names: idx == 2 ? "大萨达萨达撒多少啊大" : "娃哈哈",
+      age: (idx + 1) * 10,
       date: "201920120",
-      orderNumber: "1521",
-      customerName: "王小虎",
-      orderState: "在线",
-      orderPayState: "全付款"
+      orderNumber: idx + 1,
+      customerName: "王小虎" + idx + 1,
     }));
-    exportJsonToExcel({
-      headers: ["经销商名称", "下单时间", "订单编号", "客户名称", "订单状态", "付款状态"],
-      datas: list,
-      filename: "订单表格"
-    });
-   }
+    exportJsonToExcel({ headers, datas });
+  }
 ```
 
 # cdn
@@ -51,7 +60,7 @@
 /**
  * 引入pl-export-excel
    <body>
-     <script src="https://unpkg.com/pl-export-excel@1.1.6/dist/index.js"></script>;
+     <script src="https://cdn.jsdelivr.net/npm/pl-export-excel/dist/index.full.min.js"></script>;
      <script>
        const { exportJsonToExcel } = PlExportExcel;
        // 导出按钮方法
@@ -64,6 +73,7 @@
 ### ts type declare
 
 ```ts
+/** 主标题配置 */
 export type ISubTitle = {
   /** 标题文本 */
   title: string | number;
@@ -72,6 +82,15 @@ export type ISubTitle = {
   /** 需要合并列数-默认为headers字段的长度 */
   colNum?: number;
 };
+
+/** 表头部配置, 导出后表格头部的顺序就是数组的顺序 */
+export type IHeaders = {
+  /** 表头标题文本 */
+  title: string | number;
+  /** key值: 对应表格数据中的字段key名 */
+  key: string;
+}[];
+
 /**
  * 合并单元格配置： c or r: 0开始计算
  * 示例：
