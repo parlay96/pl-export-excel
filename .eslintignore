@@ -1,6 +1,0 @@
-node_modules/
-**/node_modules/
-dist/
-mocks/
-pnpm-lock.yaml
-.eslintrc.cjs
