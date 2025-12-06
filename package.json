@@ -1,0 +1,72 @@
+{
+  "name": "pl-export-excel",
+  "version": "1.1.8",
+  "description": "Export Excel files to JSON data and convert JSON data to Excel files",
+  "keywords": [
+    "export-excel",
+    "excel-renderer",
+    "excel_file_to_json_data",
+    "pl-export-excel"
+  ],
+  "license": "MIT",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parlay96/pl-export-excel"
+  },
+  "scripts": {
+    "build": "rimraf -rf dist && rollup -c ./rollup.config.mjs && npm run build:min && npm run build:typed && npm run copy",
+    "build:min": "rollup -c ./rollup.min.mjs",
+    "build:typed": "tsc --declaration --emitDeclarationOnly --noEmit false --outDir dist/types",
+    "copy": "node ./copy.js",
+    "clean-node_modules": "rimraf -rf node_modules",
+    "lint": "eslint \"src/**/*.{ts,tsx,js}\""
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "file-saver": "^2.0.5"
+  },
+  "devDependencies": {
+    "@esbuild-kit/cjs-loader": "^2.2.1",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@pnpm/types": "^8.4.0",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^20.4.10",
+    "@types/gulp": "^4.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "esbuild": "0.19.11",
+    "eslint": "^8.47.0",
+    "eslint-config-prettier": "^9.0.0",
+    "fast-glob": "^3.3.1",
+    "lint-staged": "^15.1.0",
+    "prettier": "^3.1.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^4.9.1",
+    "gulp": "^4.0.2",
+    "rollup-plugin-esbuild": "^6.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.1.6",
+    "gulp-autoprefixer": "^9.0.0",
+    "chalk": "^5.0.1",
+    "consola": "^2.15.3",
+    "fs-extra": "^11.1.1"
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "lint-staged": {
+    "*.{js,ts,md}": "eslint --fix"
+  }
+}
