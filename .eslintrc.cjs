@@ -21,6 +21,7 @@ module.exports = {
     quotes: "off",
     "no-unsafe-optional-chaining": "off",
     "prefer-const": "off",
+    "no-async-promise-executor": "off",
     // TypeScript/ESLint 推荐的规则
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-unused-vars": "warn", // 不允许存在未使用的 TypeScript 变量
