@@ -10,7 +10,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://gcore.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
   <script src="https://gcore.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-
   <!-- Tailwind 配置 -->
   <script>
     tailwind.config = {
@@ -351,7 +350,7 @@ exportJsonToExcel({
                 <td class="px-6 py-4 text-sm font-medium text-primary">autoWidth</td>
                 <td class="px-6 py-4 text-sm text-gray-600">Boolean</td>
                 <td class="px-6 py-4 text-sm text-red-600">否</td>
-                <td class="px-6 py-4 text-sm text-gray-600">宽度是否自适应, 默认值为true</td>
+                <td class="px-6 py-4 text-sm text-gray-600">宽度是否自适应, 默认值为false</td>
               </tr>
               <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-sm font-medium text-primary">bookType</td>
@@ -682,8 +681,8 @@ console.log(res);
   </button>
 
   <!-- 引入 pl-export-excel 库 -->
-  <script src="https://gcore.jsdelivr.net/npm/pl-export-excel/dist/index.full.min.js"></script>
-  <!-- <script src="../dist/index.full.min.js"></script> -->
+  <!-- <script src="https://gcore.jsdelivr.net/npm/pl-export-excel/dist/index.full.min.js"></script> -->
+  <script src="../dist/index.full.min.js"></script>
 
   <!-- 页面脚本 -->
   <script>
@@ -822,7 +821,7 @@ console.log(res);
         orderState: "在线",
         orderPayState: "全付款",
         city: idx % 2 === 0 ? "上海" : "北京",
-        address: idx % 2 === 0 ? "上海金沙江路200号" : "北京长安街1516号"
+        address: idx % 2 === 0 ? "上海金沙江200号上海金沙江路200号" : "北京长安街1516号"
       }));
 
       exportJsonToExcel({

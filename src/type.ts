@@ -56,3 +56,66 @@ export interface IExcelToJsonOptions {
 }
 
 export type IOriginalList = (string | number | null)[][];
+
+export type IOriginalStyles = Partial<{
+  /** 单元格填充样式（背景填充）solid: 纯色填充 none: 无填充 */
+  patternType: "solid" | "none";
+  /** 填充前景色: 指定十六进制 RGB 值 */
+  fgColor: string;
+  /** 填充背景色: 指定十六进制 RGB 值 */
+  // bgColor: string;
+  /** 字体 */
+  fontFamily: string;
+  /** 字体大小 */
+  fontSize: number;
+  /** 字体颜色: 指定十六进制 RGB 值 */
+  color: string;
+  /** 是否加粗 */
+  isBold: boolean;
+  /** 是否下划线 */
+  isUnderline: boolean;
+  /** 是否斜体 */
+  isItalic: boolean;
+  /** 垂直对齐方式 */
+  alignmentVertical: "bottom" | "center" | "top";
+  /** 水平对齐方式 */
+  alignmentHorizontal: "left" | "center" | "right";
+  /** 是否自动换行 */
+  wrapText: boolean;
+  /** 上边框线 */
+  borderTop: {
+    style: IBORDER_STYLE;
+    /** 边框颜色: 指定十六进制 RGB 值 */
+    color: string;
+  };
+  /** 下边框线 */
+  borderBottom: {
+    style: IBORDER_STYLE;
+    /** 边框颜色: 指定十六进制 RGB 值 */
+    color: string;
+  };
+  /** 左边框线 */
+  borderLeft: {
+    style: IBORDER_STYLE;
+    /** 边框颜色: 指定十六进制 RGB 值 */
+    color: string;
+  };
+  /** 右边框线 */
+  borderRight: {
+    style: IBORDER_STYLE;
+    /** 边框颜色: 指定十六进制 RGB 值 */
+    color: string;
+  };
+}>;
+
+export type IBORDER_STYLE =
+  /** 细实线 */
+  | "thin"
+  /** 中实线 */
+  | "medium"
+  /** 粗实线 */
+  | "thick"
+  /** 虚线 */
+  | "dashed"
+  /** 点线 */
+  | "dotted";

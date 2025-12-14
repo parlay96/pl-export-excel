@@ -3,7 +3,7 @@ import isFunction from "lodash/isFunction";
 import isObject from "lodash/isObject";
 import cloneDeep from "lodash/cloneDeep";
 import { saveAs } from "file-saver";
-import { IExcelOptions, IOriginalList, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
+import { IExcelOptions, IOriginalStyles, IOriginalList, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
 
 class Workbook {
   SheetNames: string[] = [];
@@ -11,7 +11,8 @@ class Workbook {
   constructor() {}
 }
 
-const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
+// const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
+const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.8/dist/xlsx.core.min.js";
 const loadScript = (src: string): Promise<void> => {
   // Check if there are already script tags with the same src
   if (document.querySelector(`script[src="${src}"]`)) {
@@ -68,7 +69,7 @@ const formatData = (datas: IExcelOptions["datas"], headers: IExcelOptions["heade
 const expandConfig = (options: IExcelOptions) => {
   const defaults = {
     bookType: "xlsx",
-    autoWidth: true,
+    autoWidth: false,
     filename: "excel-list",
     xlsxStyleResourceUrl: baseResourceUrl
   } as Partial<IExcelOptions>;
@@ -132,36 +133,6 @@ const two_array_to_sheet = (data: IFormatData) => {
 };
 
 /**
- * css transform to OpenXML
- * @param styles css obj
- * @returns
- */
-const transformStyles = (styles: any) => {
-  if (!isObject(isObject)) return null;
-  const styleDict = {
-    patternType: "patternType",
-    fgColor: "fgColor",
-    bgColor: "bgColor",
-    // 2
-    fontFamily: "name",
-    fontSize: "sz",
-    color: "color",
-    bold: "bold",
-    underline: "underline",
-    italic: "italic",
-    // 3
-    vertical: "vertical",
-    horizontal: "horizontal",
-    wrapText: "wrapText",
-    // 4
-    borderTop: "top",
-    borderBottom: "bottom",
-    borderLeft: "left",
-    borderRight: "right"
-  };
-  console.log(styles);
-};
-/**
  * Handling title
  * @param titleConfig title configuration
  * @param defaultColNum Default is the length of the headers field
@@ -193,6 +164,60 @@ const handleTitle = (titleConfig: ISubTitle, defaultColNum: number) => {
   return data;
 };
 
+/**
+ * css transform to OpenXML
+ * @param styles css obj
+ * @returns
+ */
+const transformStyles = (styles: IOriginalStyles) => {
+  if (!isObject(isObject)) return null;
+  const styleDict = {
+    patternType: { pkey: "fill", val: "patternType" },
+    fgColor: { pkey: "fill", val: "fgColor" },
+    bgColor: { pkey: "fill", val: "bgColor" },
+    // 2
+    fontFamily: { pkey: "font", val: "name" },
+    fontSize: { pkey: "font", val: "sz" },
+    color: { pkey: "font", val: "color" },
+    isBold: { pkey: "font", val: "bold" },
+    isUnderline: { pkey: "font", val: "underline" },
+    isItalic: { pkey: "font", val: "italic" },
+    // 3
+    alignmentVertical: { pkey: "alignment", val: "vertical" },
+    alignmentHorizontal: { pkey: "alignment", val: "horizontal" },
+    wrapText: { pkey: "alignment", val: "wrapText" },
+    // 4
+    borderTop: { pkey: "border", val: "top" },
+    borderBottom: { pkey: "border", val: "bottom" },
+    borderLeft: { pkey: "border", val: "left" },
+    borderRight: { pkey: "border", val: "right" }
+  };
+  const result = {};
+  Object.keys(styles).forEach((key) => {
+    // console.log("键名：", key, "，值：", styles[key]);
+    const item = styleDict[key];
+
+    if (!result[item.pkey]) {
+      result[item.pkey] = {};
+    }
+
+    if (key.includes("Color") || key.includes("color")) {
+      const val = { rgb: styles[key].replace("#", "") };
+      result[item.pkey][item.val] = val;
+    } else if (key.includes("border")) {
+      if (styles[key] && styles[key]?.color) {
+        const val = styles[key];
+        val.color = { rgb: val.color.replace("#", "") };
+        result[item.pkey][item.val] = val;
+      } else {
+        delete result[item.pkey];
+      }
+    } else {
+      result[item.pkey][item.val] = styles[key];
+    }
+  });
+  return result;
+};
 /** handle title merges and style  */
 const handleTitleMergesAndStyle = (ws: any, titleConfig: ISubTitle): any => {
   const exist = titleConfig.colNum && titleConfig.rowNum && titleConfig.title;
@@ -210,21 +235,25 @@ const handleTitleMergesAndStyle = (ws: any, titleConfig: ISubTitle): any => {
         r: titleConfig.rowNum - 1
       }
     });
-    if (lvs["A1"]) {
-      lvs["A1"].s = {
-        font: {
-          name: "微软雅黑",
-          sz: 18,
-          color: { rgb: "333333" },
-          bold: true,
-          italic: false,
-          underline: false
-        },
-        alignment: {
-          horizontal: "center",
-          vertical: "center"
-        }
-      };
+    const style = transformStyles({
+      patternType: "solid",
+      fgColor: "#CD950C",
+      fontFamily: "微软雅黑",
+      fontSize: 18,
+      color: "#333333",
+      isBold: true,
+      isUnderline: false,
+      isItalic: false,
+      alignmentVertical: "center",
+      alignmentHorizontal: "center",
+      wrapText: true
+      // borderTop: {
+      //   style: "thin",
+      //   color: "#FF83FA"
+      // }
+    });
+    if (lvs["A1"] && style) {
+      lvs["A1"].s = style;
     }
     return lvs;
   } catch (error) {
@@ -369,21 +398,21 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
   }
   console.log(ws);
   try {
-    // wb.SheetNames.push("Excel");
-    // wb.Sheets["Excel"] = ws;
-    // const wbout = XLSX.write(wb, {
-    //   bookType: bookType,
-    //   bookSST: false,
-    //   // binary: binary string (byte n is data.charCodeAt(n))
-    //   type: "binary"
-    // });
-    // // console.log(wb);
-    // saveAs(
-    //   new Blob([s2ab(wbout)], {
-    //     type: "application/octet-stream"
-    //   }),
-    //   `${filename}.${bookType}`
-    // );
+    wb.SheetNames.push("Excel");
+    wb.Sheets["Excel"] = ws;
+    const wbout = XLSX.write(wb, {
+      bookType: bookType,
+      bookSST: false,
+      // binary: binary string (byte n is data.charCodeAt(n))
+      type: "binary"
+    });
+    // console.log(wb);
+    saveAs(
+      new Blob([s2ab(wbout)], {
+        type: "application/octet-stream"
+      }),
+      `${filename}.${bookType}`
+    );
   } catch (error) {
     console.error("Failed:", error);
   }
