@@ -422,14 +422,16 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
       const cellKeys = getWorksheetAllCellKeys(ws);
       if (cellKeys.length) {
         const styles = styleCb(cellKeys);
-        Object.keys(styles).forEach((key) => {
-          if (styles[key]) {
-            const stl = transformStyles(styles[key]);
-            if (stl) {
-              ws[key].s = stl;
+        if (styles) {
+          Object.keys(styles).forEach((key) => {
+            if (styles[key]) {
+              const stl = transformStyles(styles[key]);
+              if (stl) {
+                ws[key].s = stl;
+              }
             }
-          }
-        });
+          });
+        }
       }
     } catch (error) {
       console.error("Failed:", error);
