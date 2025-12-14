@@ -40,7 +40,7 @@ export interface IExcelOptions {
   bookType?: "xlsx" | "xlsm" | "xlsb" | "xlml" | "csv" | "txt" | "html";
   /** 设置单元格样式 */
   styleCb?: (ws: any) => any;
-  /** 自定义xlsx样式资源地址 */
+  /** 自定义xlsx样式资源地址，基本用不到 */
   xlsxStyleResourceUrl?: string;
 }
 
@@ -51,6 +51,8 @@ export interface IExcelToJsonOptions {
   startRow?: number;
   /** 转成数组对象必填，单元格每列它所对应的key值;*/
   keys?: string[];
-  /** 自定义xlsx样式资源地址 */
+  /** 自定义xlsx样式资源地址，基本用不到 */
   xlsxStyleResourceUrl?: string;
 }
+
+export type IOriginalList = (string | number | null)[][];

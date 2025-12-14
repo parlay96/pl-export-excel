@@ -3,7 +3,7 @@ import isFunction from "lodash/isFunction";
 import isObject from "lodash/isObject";
 import cloneDeep from "lodash/cloneDeep";
 import { saveAs } from "file-saver";
-import { IExcelOptions, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
+import { IExcelOptions, IOriginalList, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
 
 class Workbook {
   SheetNames: string[] = [];
@@ -11,7 +11,7 @@ class Workbook {
   constructor() {}
 }
 
-const baseResourceUrl = "https://cdn.jsdelivr.net/npm/pl-export-excel@1.1.7/dist/xlsx.core.min.js";
+const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
 const loadScript = (src: string): Promise<void> => {
   // Check if there are already script tags with the same src
   if (document.querySelector(`script[src="${src}"]`)) {
@@ -131,6 +131,36 @@ const two_array_to_sheet = (data: IFormatData) => {
   return ws;
 };
 
+/**
+ * css transform to OpenXML
+ * @param styles css obj
+ * @returns
+ */
+const transformStyles = (styles: any) => {
+  if (!isObject(isObject)) return null;
+  const styleDict = {
+    patternType: "patternType",
+    fgColor: "fgColor",
+    bgColor: "bgColor",
+    // 2
+    fontFamily: "name",
+    fontSize: "sz",
+    color: "color",
+    bold: "bold",
+    underline: "underline",
+    italic: "italic",
+    // 3
+    vertical: "vertical",
+    horizontal: "horizontal",
+    wrapText: "wrapText",
+    // 4
+    borderTop: "top",
+    borderBottom: "bottom",
+    borderLeft: "left",
+    borderRight: "right"
+  };
+  console.log(styles);
+};
 /**
  * Handling title
  * @param titleConfig title configuration
@@ -337,29 +367,29 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
   if (isFunction(styleCb)) {
     styleCb(ws);
   }
-  // console.log(ws);
+  console.log(ws);
   try {
-    wb.SheetNames.push("Excel");
-    wb.Sheets["Excel"] = ws;
-    const wbout = XLSX.write(wb, {
-      bookType: bookType,
-      bookSST: false,
-      // binary: binary string (byte n is data.charCodeAt(n))
-      type: "binary"
-    });
-    // console.log(wb);
-    saveAs(
-      new Blob([s2ab(wbout)], {
-        type: "application/octet-stream"
-      }),
-      `${filename}.${bookType}`
-    );
+    // wb.SheetNames.push("Excel");
+    // wb.Sheets["Excel"] = ws;
+    // const wbout = XLSX.write(wb, {
+    //   bookType: bookType,
+    //   bookSST: false,
+    //   // binary: binary string (byte n is data.charCodeAt(n))
+    //   type: "binary"
+    // });
+    // // console.log(wb);
+    // saveAs(
+    //   new Blob([s2ab(wbout)], {
+    //     type: "application/octet-stream"
+    //   }),
+    //   `${filename}.${bookType}`
+    // );
   } catch (error) {
     console.error("Failed:", error);
   }
 };
 
-export const excelToJson = (options: IExcelToJsonOptions): Promise<{ originalList: any[]; formatList: any[] }> => {
+export const excelToJson = (options: IExcelToJsonOptions): Promise<{ originalList: IOriginalList; formatList: { [key: string]: any }[] }> => {
   return new Promise(async (resolve, reject) => {
     const { file, keys, startRow, xlsxStyleResourceUrl } = isObject(options) ? options : ({} as IExcelToJsonOptions);
     try {
@@ -387,8 +417,8 @@ export const excelToJson = (options: IExcelToJsonOptions): Promise<{ originalLis
             const list = startRow ? jsonData.slice(startRow) : jsonData;
             const cvt = list.map((items) => {
               const obj: any = {};
-              items.forEach((item, index) => {
-                obj[keys[index]] = item || "";
+              keys.forEach((key, index) => {
+                obj[key] = items[index] || "";
               });
               return obj;
             });

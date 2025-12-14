@@ -2,6 +2,8 @@
 
 > Export Excel files to JSON data and convert JSON data to Excel files
 
+[文档](https://parlay96.github.io/pl-export-excel/)
+
 # install
 
 > npm i pl-export-excel
