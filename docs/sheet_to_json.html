@@ -1,7 +1,3 @@
-<!--
- * @Date: 2025-12-08 09:10:39
- * @Description: Modify here please
--->
 <!doctype html>
 <html lang="en">
   <head>
@@ -25,7 +21,6 @@
       <input type="file" id="fileInput" accept=".xlsx, .xls" />
       <pre id="output"></pre>
     </div>
-    <button id="demoBtn2">点击导出</button>
   </body>
 
   <script>
@@ -41,36 +36,6 @@
       });
       console.log(res);
       document.getElementById("output").textContent = JSON.stringify(res, null, 2);
-    });
-
-    document.getElementById("demoBtn2").addEventListener("click", function () {
-      const list = Array.from({ length: 200 }, (_, idx) => ({
-        names: idx == 2 ? "大萨达萨达撒多少啊大" : "娃哈哈",
-        date: "2023-11-20",
-        orderNumber: idx + 1,
-        customerName: "王小虎" + idx + 1,
-        orderState: "在线",
-        orderPayState: "全付款",
-        city: idx % 2 === 0 ? "上海" : "北京",
-        address: idx % 2 === 0 ? "上海金沙江路200号" : "北京长安街1516号"
-      }));
-      const { exportJsonToExcel } = PlExportExcel;
-      exportJsonToExcel({
-        headers: [
-          { title: "经销商名称", key: "names" },
-          { title: "下单时间", key: "date" },
-          { title: "订单编号", key: "orderNumber" },
-          { title: "客户名称", key: "customerName" },
-          { title: "城市", key: "city" },
-          { title: "地址", key: "address" }
-        ],
-        datas: list,
-        filename: "11月订单表格",
-        titleConfig: {
-          title: "11月订单表格",
-          rowNum: 2
-        }
-      });
     });
   </script>
 </html>

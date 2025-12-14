@@ -11,8 +11,7 @@ class Workbook {
   constructor() {}
 }
 
-// const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
-const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.8/dist/xlsx.core.min.js";
+const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
 const loadScript = (src: string): Promise<void> => {
   // Check if there are already script tags with the same src
   if (document.querySelector(`script[src="${src}"]`)) {
@@ -326,6 +325,31 @@ const handleAutoWidth = (ws: any, list: IFormatData) => {
   }
 };
 
+const getWorksheetAllCellKeys = (ws: any, isColumnFirst = true) => {
+  // 获取工作表的已用范围（无数据则默认 A1）
+  const ref = ws["!ref"] || "A1";
+  const {
+    s: { r: startRow, c: startCol },
+    e: { r: endRow, c: endCol }
+  } = XLSX.utils.decode_range(ref);
+
+  const cellKeys = [];
+
+  if (isColumnFirst) {
+    for (let c = startCol; c <= endCol; c++) {
+      for (let r = startRow; r <= endRow; r++) {
+        cellKeys.push(XLSX.utils.encode_cell({ r, c }));
+      }
+    }
+  } else {
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startCol; c <= endCol; c++) {
+        cellKeys.push(XLSX.utils.encode_cell({ r, c }));
+      }
+    }
+  }
+  return cellKeys;
+};
 export const exportJsonToExcel = async (options: IExcelOptions) => {
   const mergeOptions = expandConfig(options);
   const { titleConfig, multiHeader, filename, bookType, merges, autoWidth, styleCb, xlsxStyleResourceUrl } = mergeOptions;
@@ -394,9 +418,24 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
   }
   // add custom style
   if (isFunction(styleCb)) {
-    styleCb(ws);
+    try {
+      const cellKeys = getWorksheetAllCellKeys(ws);
+      if (cellKeys.length) {
+        const styles = styleCb(cellKeys);
+        Object.keys(styles).forEach((key) => {
+          if (styles[key]) {
+            const stl = transformStyles(styles[key]);
+            if (stl) {
+              ws[key].s = stl;
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Failed:", error);
+    }
   }
-  console.log(ws);
+  // console.log(ws);
   try {
     wb.SheetNames.push("Excel");
     wb.Sheets["Excel"] = ws;

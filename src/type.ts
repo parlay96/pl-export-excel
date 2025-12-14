@@ -39,7 +39,7 @@ export interface IExcelOptions {
   /** 导出的文件类型 */
   bookType?: "xlsx" | "xlsm" | "xlsb" | "xlml" | "csv" | "txt" | "html";
   /** 设置单元格样式 */
-  styleCb?: (ws: any) => any;
+  styleCb?: (cellKeys: string[]) => { [key: string]: IOriginalStyles };
   /** 自定义xlsx样式资源地址，基本用不到 */
   xlsxStyleResourceUrl?: string;
 }

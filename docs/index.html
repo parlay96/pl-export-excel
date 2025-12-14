@@ -365,7 +365,7 @@ exportJsonToExcel({
                 <td class="px-6 py-4 text-sm text-gray-600">
                   <a href="https://github.com/parlay96/pl-export-excel?tab=readme-ov-file#cell-styles"
                     style="color: red;" target="_blank">样式表?</a>
-                  自定义回调函数，接收 ws 对象，可自定义单元格样式
+                  自定义回调函数，可自定义单元格样式
                 </td>
               </tr>
               <tr class="hover:bg-gray-50 transition-colors">
@@ -570,7 +570,7 @@ exportJsonToExcel({ headers, datas });</code></pre>
     ["", "", "", "", "", ""],
     ["标题2", "", "", "", "", ""]
   ],
-  // 合并多级头位一个单元
+  // 合并多级头为一个单元
   merges: [
     {
       s: {
@@ -598,15 +598,41 @@ exportJsonToExcel({ headers, datas });</code></pre>
     }
   ],
   // 自定义单元格样式
-  styleCb: function (ws) {
-    ws["A1"].s = {
-      font: { name: "微软雅黑", sz: 16, color: { rgb: "CD0000" }, bold: true },
-      fill: { fgColor: { rgb: "AEEEEE" } }
+  styleCb: function (cellKeys) {
+    console.log(cellKeys)
+    const obj = {};
+    /**
+      * 返回一个如obj = {
+        // A1代表第一个单元格，对象为一个样式对象类型为：（IOriginalStyles）
+      A1: {
+        ...
+      }
+      }
+    */
+    obj[cellKeys[0]] = {
+      fontFamily: "微软雅黑",
+      fontSize: 16,
+      color: "#CD0000",
+      isBold: true,
+      fgColor: "#AEEEEE"
     };
-    ws["A3"].s = {
-      font: { name: "微软雅黑", sz: 16, color: { rgb: "33ff99" } },
-      fill: { fgColor: { rgb: "CD950C" } }
+    obj[cellKeys[2]] = {
+      fontFamily: "微软雅黑",
+      fontSize: 16,
+      color: "#33ff99",
+      fgColor: "#CD950C"
     };
+
+    for (let i = 0; i < cellKeys.length; i++) {
+      // 给地址这一列设置样式
+      if (cellKeys[i].includes("F")) {
+        obj[cellKeys[i]] = {
+          wrapText: true
+        }
+      }
+    }
+
+    return obj;
   }
 });</code></pre>
           </div>
@@ -681,8 +707,7 @@ console.log(res);
   </button>
 
   <!-- 引入 pl-export-excel 库 -->
-  <!-- <script src="https://gcore.jsdelivr.net/npm/pl-export-excel/dist/index.full.min.js"></script> -->
-  <script src="../dist/index.full.min.js"></script>
+  <script src="https://gcore.jsdelivr.net/npm/pl-export-excel/dist/index.full.min.js"></script>
 
   <!-- 页面脚本 -->
   <script>
@@ -850,7 +875,7 @@ console.log(res);
         orderNumber: idx + 1,
         customerName: "王小虎" + idx + 1,
         city: idx % 2 === 0 ? "上海" : "北京",
-        address: idx % 2 === 0 ? "上海金沙江路200号" : "北京长安街1516号"
+        address: idx % 2 === 0 ? "上海金沙江路200号上海金沙江路200号上海金沙江路200号" : "北京长安街1516号"
       }));
 
       exportJsonToExcel({
@@ -879,30 +904,41 @@ console.log(res);
             e: { c: 5, r: 2 }
           }
         ],
-        styleCb: function (ws) {
-          ws["A1"].s = {
-            font: {
-              name: "微软雅黑",
-              sz: 16,
-              color: { rgb: "CD0000" },
-              bold: true,
-              italic: false,
-              underline: false
-            },
-            fill: {
-              fgColor: { rgb: "AEEEEE" }
+        styleCb: function (cellKeys) {
+          console.log(cellKeys)
+          const obj = {};
+          /**
+           * 返回一个如obj = {
+             // A1代表第一个单元格，对象为一个样式对象类型为：（IOriginalStyles）
+            A1: {
+              ...
             }
-          };
-          ws["A3"].s = {
-            font: {
-              name: "微软雅黑",
-              sz: 16,
-              color: { rgb: "33ff99" }
-            },
-            fill: {
-              fgColor: { rgb: "CD950C" }
             }
+          */
+          obj[cellKeys[0]] = {
+            fontFamily: "微软雅黑",
+            fontSize: 16,
+            color: "#CD0000",
+            isBold: true,
+            fgColor: "#AEEEEE"
           };
+          obj[cellKeys[2]] = {
+            fontFamily: "微软雅黑",
+            fontSize: 16,
+            color: "#33ff99",
+            fgColor: "#CD950C"
+          };
+
+          for (let i = 0; i < cellKeys.length; i++) {
+            // 给地址这一列设置样式
+            if (cellKeys[i].includes("F")) {
+              obj[cellKeys[i]] = {
+                wrapText: true
+              }
+            }
+          }
+
+          return obj;
         }
       });
     });
