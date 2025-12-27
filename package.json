@@ -1,6 +1,6 @@
 {
   "name": "pl-export-excel",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Export Excel files to JSON data and convert JSON data to Excel files",
   "keywords": [
     "export-excel",

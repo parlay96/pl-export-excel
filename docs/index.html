@@ -369,6 +369,18 @@ exportJsonToExcel({
                 </td>
               </tr>
               <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-medium text-primary">customColsAttrCb</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Function</td>
+                <td class="px-6 py-4 text-sm text-red-600">否</td>
+                <td class="px-6 py-4 text-sm text-gray-600">自定义列属性</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 text-sm font-medium text-primary">customRolsAttrCb</td>
+                <td class="px-6 py-4 text-sm text-gray-600">Function</td>
+                <td class="px-6 py-4 text-sm text-red-600">否</td>
+                <td class="px-6 py-4 text-sm text-gray-600">自定义行属性</td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 text-sm font-medium text-primary">xlsxStyleResourceUrl</td>
                 <td class="px-6 py-4 text-sm text-gray-600">String</td>
                 <td class="px-6 py-4 text-sm text-red-600">否</td>
@@ -634,6 +646,13 @@ exportJsonToExcel({ headers, datas });</code></pre>
 
     return obj;
   }
+  // 设置列宽
+  customColsAttrCb(colTotal) {
+    return {
+      // 给第一列设置100字符宽度
+      1: { width: 100 },
+    }
+  },
 });</code></pre>
           </div>
         </div>
@@ -939,7 +958,14 @@ console.log(res);
           }
 
           return obj;
-        }
+        },
+        // 设置列宽
+        customColsAttrCb(colTotal) {
+          return {
+            // 给第一列设置100字符宽度
+            1: { width: 100 },
+          }
+        },
       });
     });
   </script>

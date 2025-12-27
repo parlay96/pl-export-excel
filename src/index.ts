@@ -1,6 +1,7 @@
 import isArray from "lodash/isArray";
 import isFunction from "lodash/isFunction";
 import isObject from "lodash/isObject";
+import isEmpty from "lodash/isEmpty";
 import cloneDeep from "lodash/cloneDeep";
 import { saveAs } from "file-saver";
 import { IExcelOptions, IOriginalStyles, IOriginalList, IFormatData, ISubTitle, IExcelToJsonOptions } from "./type";
@@ -11,7 +12,7 @@ class Workbook {
   constructor() {}
 }
 
-const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.1.9/dist/xlsx_style.min.js";
+const baseResourceUrl = "https://gcore.jsdelivr.net/npm/pl-export-excel@1.2.0/dist/xlsx_style.min.js";
 const loadScript = (src: string): Promise<void> => {
   // Check if there are already script tags with the same src
   if (document.querySelector(`script[src="${src}"]`)) {
@@ -352,7 +353,7 @@ const getWorksheetAllCellKeys = (ws: any, isColumnFirst = true) => {
 };
 export const exportJsonToExcel = async (options: IExcelOptions) => {
   const mergeOptions = expandConfig(options);
-  const { titleConfig, multiHeader, filename, bookType, merges, autoWidth, styleCb, xlsxStyleResourceUrl } = mergeOptions;
+  const { titleConfig, multiHeader, filename, bookType, merges, autoWidth, styleCb, customColsAttrCb, customRolsAttrCb, xlsxStyleResourceUrl } = mergeOptions;
   const createWorkbook = (): Workbook => {
     return new Workbook();
   };
@@ -411,6 +412,75 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
 
   if (autoWidth) {
     ws = handleAutoWidth(ws, list);
+  } else {
+    // custom width
+    if (isFunction(customColsAttrCb)) {
+      let colCount = 0;
+      if ((ws as any)["!ref"]) {
+        const range = XLSX.utils.decode_range((ws as any)["!ref"]);
+        colCount = range.e.c + 1;
+      }
+      if (colCount) {
+        const res = customColsAttrCb(colCount);
+        if (res) {
+          // console.log(res)
+          const data: any = [];
+          Object.keys(res).forEach((key: any) => {
+            const obj: any = {};
+            const item = res[key];
+            if (!isEmpty(item)) {
+              const wch = Number(item?.width);
+              if (wch && wch >= 0) {
+                obj["wch"] = wch;
+              }
+              if (item?.hidden) {
+                obj["hidden"] = true;
+              }
+              if (!isEmpty(obj) && Number(key) > 0) {
+                data[Number(key) - 1] = obj;
+              }
+            }
+          });
+          if (data.length) {
+            (ws as any)["!cols"] = data;
+          }
+        }
+      }
+    }
+
+    if (isFunction(customRolsAttrCb)) {
+      let rolCount = 0;
+      if ((ws as any)["!ref"]) {
+        const range = XLSX.utils.decode_range((ws as any)["!ref"]);
+        rolCount = range.e.r + 1;
+      }
+      if (rolCount) {
+        const res = customRolsAttrCb(rolCount);
+        if (res) {
+          // console.log(res, rolCount)
+          const data: any = [];
+          Object.keys(res).forEach((key: any) => {
+            const obj: any = {};
+            const item = res[key];
+            if (!isEmpty(item)) {
+              const height = Number(item.height);
+              if (height && height >= 0) {
+                obj["hpt"] = height;
+              }
+              if (item?.hidden) {
+                obj["hidden"] = true;
+              }
+              if (!isEmpty(obj) && Number(key) > 0) {
+                data[Number(key) - 1] = obj;
+              }
+            }
+          });
+          if (data.length) {
+            (ws as any)["!rows"] = data;
+          }
+        }
+      }
+    }
   }
   // Processing Title Styles
   if (titleConfig) {
@@ -437,7 +507,7 @@ export const exportJsonToExcel = async (options: IExcelOptions) => {
       console.error("Failed:", error);
     }
   }
-  // console.log(ws);
+  // console.log(ws)
   try {
     wb.SheetNames.push("Excel");
     wb.Sheets["Excel"] = ws;

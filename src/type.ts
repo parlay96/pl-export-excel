@@ -38,10 +38,14 @@ export interface IExcelOptions {
   autoWidth?: boolean;
   /** 导出的文件类型 */
   bookType?: "xlsx" | "xlsm" | "xlsb" | "xlml" | "csv" | "txt" | "html";
-  /** 设置单元格样式 */
-  styleCb?: (cellKeys: string[]) => { [key: string]: IOriginalStyles };
   /** 自定义xlsx样式资源地址，基本用不到 */
   xlsxStyleResourceUrl?: string;
+  /** 设置单元格样式 */
+  styleCb?: (cellKeys: string[]) => { [key: string]: IOriginalStyles };
+  /** 自定义列属性 */
+  customColsAttrCb?: (colTotal: number) => { [key: number]: { width: number; hidden?: boolean } } | null;
+  /** 自定义行属性 */
+  customRolsAttrCb?: (colTotal: number) => { [key: number]: { height: number; hidden?: boolean } } | null;
 }
 
 export interface IExcelToJsonOptions {
